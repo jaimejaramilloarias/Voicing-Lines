@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Voicing Lines for Jazz improvisation - Jaime Jaramillo Arias</title>
+  <style>
+    :root{
+      --col-w: 48px; --row-h: 48px; --gap: 12px; --sep: 16px; --radius: 14px;
+      --ink: #0b1220; --muted: #e6e8ec; --panel: #f7f8fa; --accent: #7c3aed; --divider: #b9c0cf;
+      --card-border: #e6e8ec; --bg: #f2f2f2; --btn-bg: #0f172a; --btn-fg: #ffffff;
+      --shadow: 0 8px 30px rgba(0,0,0,.06);
+      --title-grad: linear-gradient(90deg, #7c3aed 0%, #9333ea 50%, #7c3aed 100%);
+      /* mini */
+      --col-w-mini: 18px; --row-h-mini: 18px; --radius-mini: 4px; --gap-mini: 4px; --sep-mini: 6px;
+    }
+    [data-theme="dark"]{
+      --ink: #e5e7eb; --muted: #2a3344; --panel: #0b1220; --accent: #a78bfa; --divider: #3a4760;
+      --card-border: #1b2435; --bg: #0b1220; --btn-bg: #111827; --btn-fg: #e5e7eb; --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --title-grad: linear-gradient(90deg, #a78bfa 0%, #c084fc 50%, #a78bfa 100%);
+    }
+
+    *{ box-sizing: border-box; }
+    html,body{ margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; color:var(--ink); background:var(--bg); }
+
+    .app{ max-width:1100px; margin:28px auto; padding:0 20px; }
+
+    .topbar{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; margin-bottom:14px; }
+    .title{ text-align:center; font-weight:800; font-size:22px; letter-spacing:.2px; }
+    .title .accent-line{ height:3px; width:220px; margin:8px auto 0; background:var(--title-grad); border-radius:999px; box-shadow:0 4px 14px rgba(124,58,237,.18); }
+    .controls{ display:flex; gap:10px; align-items:center; justify-self:end; }
+
+    .card{ background:linear-gradient(180deg,var(--bg) 0%, var(--panel) 100%); border:1px solid var(--card-border); border-radius:16px; box-shadow:var(--shadow); padding:16px; }
+
+    .controls input[type="number"]{ width:96px; padding:10px 12px; border:1px solid var(--muted); border-radius:12px; background:var(--bg); color:var(--ink); font-size:14px; }
+    .controls button{ padding:10px 14px; border-radius:12px; border:1px solid var(--btn-bg); background:var(--btn-bg); color:var(--btn-fg); font-weight:600; cursor:pointer; }
+    .controls button.secondary{ background:transparent; color:var(--ink); border-color:var(--muted); }
+    .controls button:hover{ filter:brightness(.97); }
+
+    .stage-wrap{ margin-top:14px; overflow:hidden; padding:10px 6px 12px; }
+    .rows{ display:flex; flex-direction:column; gap:18px; }
+    .row{ display:flex; align-items:stretch; flex-wrap:nowrap; }
+
+    .group{ display:flex; gap:var(--gap); padding-right:var(--sep); margin-right:var(--sep); position:relative; }
+    .row .group:not(:last-child)::after{ content:""; position:absolute; top:0; right:0; width:6px; height:calc(var(--row-h)*4); background:var(--divider); border-radius:3px; }
+
+    .col{ width:var(--col-w); height:calc(var(--row-h)*4); display:grid; grid-template-rows:repeat(4,var(--row-h)); background:var(--bg); border:1px solid var(--muted); border-radius:14px; position:relative; }
+    .tick{ position:absolute; left:0; right:0; height:1px; background:color-mix(in srgb, var(--muted) 50%, transparent); }
+    .tick:nth-child(1){ top:var(--row-h); }
+    .tick:nth-child(2){ top:calc(var(--row-h)*2); }
+    .tick:nth-child(3){ top:calc(var(--row-h)*3); }
+
+    .dot{ align-self:center; justify-self:center; width:calc(var(--radius)*2); height:calc(var(--radius)*2); border-radius:999px; background:var(--accent); box-shadow:0 10px 18px color-mix(in srgb, var(--accent) 35%, transparent); }
+
+    .levels{ position:absolute; right:-22px; top:0; height:calc(var(--row-h)*4); display:grid; grid-template-rows:repeat(4,var(--row-h)); }
+    .levels span{ width:6px; height:6px; border-radius:999px; background:transparent; align-self:center; justify-self:center; }
+
+    .explain{ max-width:980px; margin:18px auto 0; padding:14px 18px; border:1px solid var(--card-border); border-radius:14px; background:linear-gradient(180deg,var(--panel), var(--bg)); box-shadow:var(--shadow); color:color-mix(in srgb, var(--ink) 85%, #6b7280); line-height:1.5; font-size:14px; }
+
+    /* Catálogo mini: 2 filas de 5 */
+    .catalog{ max-width:1100px; margin:14px auto 0; padding:0; }
+    .cat-line{ display:grid; grid-template-columns: repeat(5, minmax(160px, 1fr)); gap:12px; justify-items:center; }
+    .pat{ border:1px solid var(--card-border); border-radius:10px; background:linear-gradient(180deg,var(--bg), var(--panel)); box-shadow:var(--shadow); padding:6px; display:flex; align-items:center; gap:6px; font-size:10px; cursor:pointer; user-select:none; transition:transform .06s ease; width:100%; justify-content:center; }
+    .pat:active{ transform:scale(0.98); }
+    .pat[aria-pressed="true"]{ outline:2px solid var(--accent); }
+    .badge{ min-width:20px; height:20px; border-radius:999px; display:flex; align-items:center; justify-content:center; font-weight:600; border:1px solid var(--muted); background:var(--bg); color:var(--ink); font-size:10px; }
+
+    .mini-group{ display:flex; gap:var(--gap-mini); padding-right:var(--sep-mini); margin-right:var(--sep-mini); position:relative; }
+    .mini-group:not(:last-child)::after{ content:""; position:absolute; top:0; right:0; width:2px; height:calc(var(--row-h-mini)*4); background:var(--divider); border-radius:2px; }
+    .mini-col{ width:var(--col-w-mini); height:calc(var(--row-h-mini)*4); display:grid; grid-template-rows:repeat(4,var(--row-h-mini)); background:var(--bg); border:1px solid var(--muted); border-radius:6px; position:relative; }
+    .mini-tick{ position:absolute; left:0; right:0; height:1px; background:color-mix(in srgb, var(--muted) 45%, transparent); }
+    .mini-tick:nth-child(1){ top:var(--row-h-mini); }
+    .mini-tick:nth-child(2){ top:calc(var(--row-h-mini)*2); }
+    .mini-tick:nth-child(3){ top:calc(var(--row-h-mini)*3); }
+    .mini-dot{ align-self:center; justify-self:center; width:calc(var(--radius-mini)*2); height:calc(var(--radius-mini)*2); border-radius:999px; background:var(--accent); box-shadow:0 4px 8px color-mix(in srgb, var(--accent) 30%, transparent); }
+
+    .visually-hidden{ position:absolute !important; height:1px; width:1px; overflow:hidden; clip:rect(1px,1px,1px,1px); white-space:nowrap; }
+  </style>
+</head>
+<body>
+  <div class="app" id="appRoot">
+    <div class="topbar">
+      <div></div>
+      <div class="title" title="Voicing Lines for Jazz improvisation - Jaime Jaramillo Arias" aria-label="Nombre de la app">
+        Voicing Lines for Jazz improvisation — Jaime Jaramillo Arias
+        <div class="accent-line" aria-hidden="true"></div>
+      </div>
+      <div class="controls" aria-label="Tema y acciones">
+        <button id="btn-theme" class="secondary" title="Alternar modo oscuro" aria-label="Alternar tema">🌓</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="controls" style="margin-bottom:8px; justify-content:flex-start">
+        <input id="cantidad" type="number" min="1" max="200" step="1" value="1" title="Cantidad de grupos a generar" aria-label="Cantidad de grupos"/>
+        <button id="btn-generar" title="Generar (Enter)" aria-label="Generar">Generar</button>
+        <button id="btn-limpiar" class="secondary" title="Limpiar" aria-label="Limpiar">Limpiar</button>
+      </div>
+      <div class="stage-wrap">
+        <div id="rows" class="rows" aria-label="Resultado"></div>
+      </div>
+      <span class="visually-hidden" id="live" aria-live="polite"></span>
+    </div>
+
+    <div class="explain">
+      Un grupo de cuatro círculos es un "contorno" melódico en el que cada círculo corresponde a una nota de un acorde cuatriada en posición cerrada y en cualquier inversión; la app es útil para estudiar enlaces melódicos de acordes y desarrollar ideas idiomáticas en el lenguaje del jazz moderno.
+    </div>
+
+    <div class="catalog" aria-label="Catálogo de patrones">
+      <div id="cat-line" class="cat-line"></div>
+    </div>
+  </div>
+
+  <script>
+    const GRUPOS = ["1234","4321","1432","4123","2341","3214","4231","1324","1423","4132"];
+
+    const $cantidad = document.getElementById('cantidad');
+    const $btnGenerar = document.getElementById('btn-generar');
+    const $btnLimpiar = document.getElementById('btn-limpiar');
+    const $btnTheme = document.getElementById('btn-theme');
+    const $rows = document.getElementById('rows');
+    const $live = document.getElementById('live');
+    const $catLine = document.getElementById('cat-line');
+
+    const azar = (min,max)=> Math.floor(Math.random()*(max-min+1))+min;
+    const muestraAzar = arr => arr[azar(0,arr.length-1)];
+
+    function generaConRegla(k){
+      const out=[]; if(k<=0) return out;
+      out.push(muestraAzar(GRUPOS));
+      for(let i=1;i<k;i++){
+        const prev = out[i-1];
+        const lastPrev = prev[prev.length-1];
+        const candidatos = GRUPOS.filter(g=> g[0] !== lastPrev);
+        out.push(muestraAzar(candidatos.length?candidatos:GRUPOS));
+      }
+      return out;
+    }
+
+    function generaDesdeInicial(inicial, k){
+      const out=[]; if(k<=0) return out;
+      out.push(inicial);
+      for(let i=1;i<k;i++){
+        const prev = out[i-1];
+        const lastPrev = prev[prev.length-1];
+        const candidatos = GRUPOS.filter(g=> g[0] !== lastPrev);
+        out.push(muestraAzar(candidatos.length?candidatos:GRUPOS));
+      }
+      return out;
+    }
+
+    function crearGrupo(grupo, idx){
+      const $g = document.createElement('div');
+      $g.className='group';
+      $g.title = `Grupo ${idx+1}: ${grupo}`;
+      if(idx===0){
+        const $levels = document.createElement('div');
+        $levels.className='levels';
+        [4,3,2,1].forEach(()=>{ const s=document.createElement('span'); $levels.appendChild(s); });
+        $g.appendChild($levels);
+      }
+      for(let c=0;c<4;c++){
+        const d = Number(grupo[c]);
+        const $col = document.createElement('div');
+        $col.className='col';
+        $col.title = `Columna ${c+1} · Altura ${d}`;
+        for(let t=0;t<3;t++){ const tick=document.createElement('div'); tick.className='tick'; $col.appendChild(tick); }
+        const $dot=document.createElement('div');
+        $dot.className='dot';
+        $dot.style.gridRow = String(5-d);
+        $dot.title = `Altura ${d}`;
+        $col.appendChild($dot);
+        $g.appendChild($col);
+      }
+      return $g;
+    }
+
+    function crearMiniGrupo(grupo){
+      const $g = document.createElement('div');
+      $g.className='mini-group';
+      for(let c=0;c<4;c++){
+        const d = Number(grupo[c]);
+        const $col = document.createElement('div');
+        $col.className='mini-col';
+        for(let t=0;t<3;t++){ const tick=document.createElement('div'); tick.className='mini-tick'; $col.appendChild(tick); }
+        const $dot=document.createElement('div');
+        $dot.className='mini-dot';
+        $dot.style.gridRow = String(5-d);
+        $col.appendChild($dot);
+        $g.appendChild($col);
+      }
+      return $g;
+    }
+
+    function pintar(lista){
+      $rows.textContent = '';
+      for(let i=0; i<lista.length; i+=4){
+        const $row = document.createElement('div');
+        $row.className = 'row';
+        const slice = lista.slice(i, i+4);
+        slice.forEach((g, j)=>{ $row.appendChild(crearGrupo(g, i + j)); });
+        $rows.appendChild($row);
+      }
+      $live.textContent = `${lista.length} grupo(s) generado(s)`;
+    }
+
+    function renderCatalog(){
+      $catLine.textContent = '';
+      GRUPOS.forEach((g, i)=>{
+        const $pat = document.createElement('div');
+        $pat.className = 'pat';
+        $pat.title = `Patrón ${i+1}: ${g} — clic para usar como inicio`;
+        $pat.setAttribute('role','button');
+        $pat.setAttribute('tabindex','0');
+        const $badge = document.createElement('div');
+        $badge.className = 'badge';
+        $badge.textContent = i+1;
+        const $mini = crearMiniGrupo(g);
+        $pat.appendChild($badge);
+        $pat.appendChild($mini);
+
+        const activar = ()=>{
+          const n = Math.max(1, Math.min(200, parseInt($cantidad.value||'1',10)));
+          const lista = generaDesdeInicial(g, n);
+          pintar(lista);
+          $live.textContent = `Semilla ${i+1} (${g}) + ${n-1} grupo(s) generado(s)`;
+          $pat.setAttribute('aria-pressed','true');
+          setTimeout(()=> $pat.removeAttribute('aria-pressed'), 300);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+        $pat.addEventListener('click', activar);
+        $pat.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); activar(); } });
+
+        $catLine.appendChild($pat);
+      });
+    }
+
+    function onGenerar(){
+      const n = Math.max(1, Math.min(200, parseInt($cantidad.value||'1',10)));
+      pintar(generaConRegla(n));
+    }
+    function onLimpiar(){ $rows.textContent=''; $cantidad.value=1; $cantidad.focus(); $live.textContent=''; }
+
+    (function initTheme(){
+      const saved = localStorage.getItem('theme');
+      if(saved==='dark'){ document.documentElement.setAttribute('data-theme','dark'); }
+    })();
+    function toggleTheme(){
+      const isDark = document.documentElement.getAttribute('data-theme')==='dark';
+      if(isDark){ document.documentElement.removeAttribute('data-theme'); localStorage.setItem('theme','light'); }
+      else { document.documentElement.setAttribute('data-theme','dark'); localStorage.setItem('theme','dark'); }
+    }
+
+    $btnGenerar.addEventListener('click', onGenerar);
+    $btnLimpiar.addEventListener('click', onLimpiar);
+    $btnTheme.addEventListener('click', toggleTheme);
+    $cantidad.addEventListener('keydown', e=>{ if(e.key==='Enter') onGenerar(); });
+
+    pintar(generaConRegla(4));
+    renderCatalog();
+  </script>
+</body>
+</html>
